@@ -1,15 +1,71 @@
-# media_projection_creator
+# MediaProjection Creator
 
-A flutter plugin of the creator used to create MediaProjection for Android
+[![pub package](https://img.shields.io/pub/v/media_projection_creator.svg)](https://pub.dev/packages/media_projection_creator)
 
-## Getting Started
+A flutter plugin of the creator used to create `MediaProjection` instance (with requesting permission) for Android
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+> Note: Only support Android
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Related projects
 
+### iOS
+
+If you need to implement screen capture on **iOS**, I have also developed two helpful plugins:
+
+1. **[ReplayKit Launcher](https://pub.dev/packages/replay_kit_launcher)**: A flutter plugin of the launcher used to open `RPSystemBroadcastPickerView` for iOS
+
+2. **[Shared preferences with App Group](https://pub.dev/packages/shared_preference_app_group)**: Shared preference supporting iOS App Group capability (using `-[NSUserDefaults initWithSuiteName:]`)
+
+## Usage
+
+To use this plugin, add `media_projection_creator` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+
+### Example
+
+- Flutter
+
+```dart
+int errorCode = await MediaProjectionCreator.createMediaProjection();
+if (errorCode == MediaProjectionCreator.ERROR_CODE_SUCCEED) {
+    print('createMediaProjection succeed');
+}
+```
+
+- Android
+
+```java
+public class MainActivity extends FlutterActivity {
+
+    private static MediaProjection mediaProjection;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        /// Example: developers should call this method to set callback,
+        /// when dart call `createMediaProjection`, it would be return a MediaProjection through this callback
+        RequestMediaProjectionPermissionManager.getInstance().setRequestPermissionCallback(mediaProjectionCreatorCallback);
+    }
+
+    private final MediaProjectionCreatorCallback mediaProjectionCreatorCallback = new MediaProjectionCreatorCallback() {
+
+        @Override
+        public void onMediaProjectionCreated(MediaProjection projection, int errorCode) {
+            if (errorCode == RequestMediaProjectionPermissionManager.ERROR_CODE_SUCCEED) {
+                Log.i("MEDIA_PROJECTION_CREATOR", "Create media projection succeeded!");
+                mediaProjection = projection;
+            } else if (errorCode == RequestMediaProjectionPermissionManager.ERROR_CODE_FAILED_USER_CANCELED) {
+                Log.e("MEDIA_PROJECTION_CREATOR", "Create media projection failed because can not get permission");
+            } else if (errorCode == RequestMediaProjectionPermissionManager.ERROR_CODE_FAILED_SYSTEM_VERSION_TOO_LOW) {
+                Log.e("MEDIA_PROJECTION_CREATOR", "Create media projection failed because system api level is lower than 21");
+            }
+        }
+    };
+}
+```
+
+Please see the example app of this plugin for a full example.
+
+## Contributing
+
+Everyone is welcome to contribute code via pull requests, to help people asking for help, to add to our documentation, or to help out in any other way.
