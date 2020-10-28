@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="im.zego.media_projection_creator">
+    <application>
+        <activity
+            android:name="im.zego.media_projection_creator.internal.RequestMediaProjectionPermissionActivity"
+            android:theme="@style/transparent_activity">
+        </activity>
+    </application>
+</manifest>
