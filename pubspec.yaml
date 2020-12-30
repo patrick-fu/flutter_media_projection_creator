@@ -1,6 +1,6 @@
 name: media_projection_creator
 description: A flutter plugin of the creator used to create MediaProjection for Android
-version: 0.1.1
+version: 0.1.2
 homepage: https://github.com/patrick-fu/flutter_media_projection_creator
 
 environment:
