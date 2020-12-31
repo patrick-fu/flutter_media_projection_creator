@@ -21,6 +21,10 @@ public class MainActivity extends FlutterActivity {
         /// Example: developers should call this method to set callback,
         /// when dart call `createMediaProjection`, it would be return a MediaProjection through this callback
         RequestMediaProjectionPermissionManager.getInstance().setRequestPermissionCallback(mediaProjectionCreatorCallback);
+
+        /// Customize the media projection foreground notification style (available since Android Q)
+        /// If not set, it will be the system default style
+        RequestMediaProjectionPermissionManager.getInstance().setForegroundServiceNotificationStyle(R.mipmap.ic_launcher, "Screen is being captured");
     }
 
     private final MediaProjectionCreatorCallback mediaProjectionCreatorCallback = new MediaProjectionCreatorCallback() {

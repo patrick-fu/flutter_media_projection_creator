@@ -20,4 +20,10 @@ class MediaProjectionCreator {
     return await _channel.invokeMethod('createMediaProjection');
   }
 
+  /// Only support Android
+  /// Invoke this function will stop the media projection foreground notification service (since Android Q)
+  static Future<int> destroyMediaProjection() async {
+    return await _channel.invokeMethod('destroyMediaProjection');
+  }
+
 }

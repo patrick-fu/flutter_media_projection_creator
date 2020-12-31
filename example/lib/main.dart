@@ -39,6 +39,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void finish() async {
+    await MediaProjectionCreator.destroyMediaProjection();
+    setState(() {
+      createMediaProjectionResult = 'Unknown';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,15 +56,21 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Column(
             children: [
-              Padding(padding: const EdgeInsets.only(top: 50.0)),
+              SizedBox(height: 50),
               Text('Only support Android (5.0 or above)'),
-              Padding(padding: const EdgeInsets.only(top: 20.0)),
+              SizedBox(height: 20),
               CupertinoButton.filled(
-                child: Text('Start Screen Capture'),
+                child: Text('Create MediaProjection'),
                 onPressed: launch,
               ),
-              Padding(padding: const EdgeInsets.only(top: 10.0)),
-              Text('Result: $createMediaProjectionResult')
+              SizedBox(height: 10),
+              Text('Result: $createMediaProjectionResult'),
+
+              SizedBox(height: 50),
+              CupertinoButton.filled(
+                child: Text('Destroy MediaProjection'),
+                onPressed: finish,
+              ),
             ],
           ),
 

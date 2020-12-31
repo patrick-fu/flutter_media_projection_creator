@@ -33,7 +33,12 @@ public class MediaProjectionCreatorPlugin implements FlutterPlugin, MethodCallHa
 
     if (call.method.equals("createMediaProjection")) {
 
-      RequestMediaProjectionPermissionManager.getInstance().requestMediaProjectPermission(context, result);
+      RequestMediaProjectionPermissionManager.getInstance().requestMediaProjectionPermission(context, result);
+
+    } else if (call.method.equals("destroyMediaProjection")) {
+
+      RequestMediaProjectionPermissionManager.getInstance().stopMediaProjectionService(context);
+      result.success(0);
 
     } else {
 

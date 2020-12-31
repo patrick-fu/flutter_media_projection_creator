@@ -18,6 +18,7 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import im.zego.media_projection_creator.internal.MediaProjectionService;
 import im.zego.media_projection_creator.internal.RequestMediaProjectionPermissionActivity;
 import io.flutter.Log;
 import io.flutter.plugin.common.MethodChannel;
@@ -33,7 +34,13 @@ public class RequestMediaProjectionPermissionManager extends BroadcastReceiver {
 
     private MediaProjectionCreatorCallback mediaProjectionCreatorCallback;
 
+    private int foregroundNotificationIcon = 0;
+
+    private String foregroundNotificationText = "";
+
     private Context context;
+
+    private Intent service;
 
     private MethodChannel.Result flutterResult;
 
@@ -48,15 +55,22 @@ public class RequestMediaProjectionPermissionManager extends BroadcastReceiver {
         return instance;
     }
 
-    /// Developers need to set callback through manager in their native code to get mediaprojection
+    /// Developers need to set callback through manager in their native code to get media projection
     public void setRequestPermissionCallback(MediaProjectionCreatorCallback callback) {
-        mediaProjectionCreatorCallback = callback;
+        this.mediaProjectionCreatorCallback = callback;
     }
+
+    /// Developers can set the foreground notification style (available since Android Q)
+    public void setForegroundServiceNotificationStyle(int foregroundNotificationIcon, String foregroundNotificationText) {
+        this.foregroundNotificationIcon = foregroundNotificationIcon;
+        this.foregroundNotificationText = foregroundNotificationText;
+    }
+
 
 
     /* ------- Private functions ------- */
 
-    void requestMediaProjectPermission(Context context, MethodChannel.Result result) {
+    void requestMediaProjectionPermission(Context context, MethodChannel.Result result) {
         this.context = context;
         this.flutterResult = result;
         Intent intent = new Intent(context, RequestMediaProjectionPermissionActivity.class);
@@ -64,10 +78,30 @@ public class RequestMediaProjectionPermissionManager extends BroadcastReceiver {
         context.startActivity(intent);
     }
 
+    void stopMediaProjectionService(Context context) {
+        if (service != null) {
+            context.stopService(service);
+        }
+    }
+
+    public void onMediaProjectionCreated(MediaProjection mediaProjection, int errorCode) {
+        this.invokeCallback(mediaProjection, errorCode);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private MediaProjection createMediaProjection(int resultCode, Intent intent) {
-        MediaProjectionManager manager = (MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        return manager.getMediaProjection(resultCode, intent);
+    private void createMediaProjection(int resultCode, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            service = new Intent(this.context, MediaProjectionService.class);
+            service.putExtra("code", resultCode);
+            service.putExtra("data", intent);
+            service.putExtra("notificationIcon", this.foregroundNotificationIcon);
+            service.putExtra("notificationText", this.foregroundNotificationText);
+            this.context.startForegroundService(service);
+        } else {
+            MediaProjectionManager manager = (MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            MediaProjection mediaProjection = manager.getMediaProjection(resultCode, intent);
+            this.onMediaProjectionCreated(mediaProjection, ERROR_CODE_SUCCEED);
+        }
     }
 
     @Override
@@ -77,27 +111,20 @@ public class RequestMediaProjectionPermissionManager extends BroadcastReceiver {
             return;
         }
 
-        int errorCode;
-
         switch (action) {
             case "com.media_projection_creator.request_permission_result_succeeded":
                 int resultCode = intent.getIntExtra("resultCode", 100);
-                MediaProjection mediaProjection = null;
                 if (Build.VERSION.SDK_INT >= 21) {
-                    mediaProjection = createMediaProjection(resultCode, intent);
-                    errorCode = ERROR_CODE_SUCCEED;
+                    this.createMediaProjection(resultCode, intent);
                 } else {
-                    errorCode = ERROR_CODE_FAILED_SYSTEM_VERSION_TOO_LOW;
+                    this.onMediaProjectionCreated(null, ERROR_CODE_FAILED_SYSTEM_VERSION_TOO_LOW);
                 }
-                invokeCallback(mediaProjection, errorCode);
                 break;
             case "com.media_projection_creator.request_permission_result_failed_user_canceled":
-                errorCode = ERROR_CODE_FAILED_USER_CANCELED;
-                invokeCallback(null, errorCode);
+                invokeCallback(null, ERROR_CODE_FAILED_USER_CANCELED);
                 break;
             case "com.media_projection_creator.request_permission_result_failed_system_version_too_low":
-                errorCode = ERROR_CODE_FAILED_SYSTEM_VERSION_TOO_LOW;
-                invokeCallback(null, errorCode);
+                invokeCallback(null, ERROR_CODE_FAILED_SYSTEM_VERSION_TOO_LOW);
                 break;
         }
     }

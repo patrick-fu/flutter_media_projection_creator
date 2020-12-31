@@ -1,9 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="im.zego.media_projection_creator">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application>
         <activity
             android:name="im.zego.media_projection_creator.internal.RequestMediaProjectionPermissionActivity"
             android:theme="@style/transparent_activity">
         </activity>
+        <service
+            android:name=".internal.MediaProjectionService"
+            android:enabled="true"
+            android:foregroundServiceType="mediaProjection" />
     </application>
 </manifest>
