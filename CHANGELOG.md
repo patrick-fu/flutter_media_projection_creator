@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Migrated to null safety, and the minimum supported dart sdk version is upgraded to 2.12.0
+
 ## 0.2.0
 
 * Adapt to Android Q (API 29), added a `destroyMediaProjection` function to stop the foreground service.
