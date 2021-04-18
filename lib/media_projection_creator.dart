@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -25,5 +24,4 @@ class MediaProjectionCreator {
   static Future<int> destroyMediaProjection() async {
     return await _channel.invokeMethod('destroyMediaProjection');
   }
-
 }

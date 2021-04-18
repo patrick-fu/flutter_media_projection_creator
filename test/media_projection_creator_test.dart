@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:media_projection_creator/media_projection_creator.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('media_projection_creator');
